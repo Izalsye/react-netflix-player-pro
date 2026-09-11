@@ -260,6 +260,7 @@ export default function EndpointCard({ endpoint, providerId, apiKey, isExpanded,
                                 licenseServers={parsedMedia.licenseServers}
                                 customData={parsedMedia.customData}
                                 provider={endpoint.id}
+                                qualities={parsedMedia.qualities} // 🔥 INI YANG BIKIN MENUNYA NONGOL!
                                 audioConf={parsedMedia.audioConf}
                                 onBack={() => setShowMediaModal(false)} // Tutup modal saat tombol panah kiri diklik
                                 meta={{

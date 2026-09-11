@@ -28,7 +28,7 @@ interface VideoPlayerProps {
 }
 
 export default function CustomPlayer({
-    src, provider, customData, licenseServers, subtitles, audioConf, meta, episodes, onBack, currentEpisodeIndex, onPlayEpisode, seasons, currentSeasonIndex, onSeasonChange
+    src, provider, customData, licenseServers, subtitles, audioConf, meta, episodes, onBack, currentEpisodeIndex, onPlayEpisode, seasons, currentSeasonIndex, onSeasonChange, qualities
 }: VideoPlayerProps) {
     const videoRef = useRef<HTMLVideoElement | null>(null);
     const containerRef = useRef<HTMLDivElement>(null);
@@ -39,7 +39,7 @@ export default function CustomPlayer({
         availableAudios, changeAudio,
         availableQualities, changeQuality,
         playbackRate, changeSpeed
-    } = useVideoEngine(videoRef, src, provider, customData, licenseServers, audioConf, subtitles);
+    } = useVideoEngine(videoRef, src, provider, customData, licenseServers, audioConf, subtitles, qualities);
 
     const [isPlaying, setIsPlaying] = useState(false);
     const [progress, setProgress] = useState(0);
@@ -211,13 +211,15 @@ export default function CustomPlayer({
             />
 
             {/* 🔥 FITUR DEWA: TOMBOL SKIP INTRO 🔥 */}
-            {/* Tombol ini sengaja ditaruh di luar bungkus opacity controls biar tetep muncul biarpun mouse diem */}
             {showSkipIntro && (
                 <button
                     onClick={handleSkipIntro}
-                    className="absolute bottom-[20%] sm:bottom-24 right-4 sm:right-10 bg-black/60 hover:bg-white hover:text-black border border-white/40 text-white font-bold py-1.5 sm:py-2 px-3 sm:px-5 rounded transition-all z-40 flex items-center gap-2 text-[10px] sm:text-sm shadow-2xl backdrop-blur-md"
+                    className="absolute bottom-[20%] sm:bottom-24 right-4 sm:right-10 bg-black/60 hover:bg-white hover:text-black border border-white/40 text-white font-bold py-1.5 sm:py-2 px-3 sm:px-5 rounded transition-all z-40 flex items-center gap-2 text-[10px] sm:text-sm shadow-2xl backdrop-blur-md group"
                 >
-                    <svg className="w-3 h-3 sm:w-4 sm:h-4 fill-currentColor" viewBox="0 0 24 24"><path d="M5 4l10 8-10 8V4zm12 0v16h2V4h-2z" /></svg>
+                    {/* 👇 Fix warna icon pakai fill-current biar ngikutin text-white & hover:text-black 👇 */}
+                    <svg className="w-3 h-3 sm:w-4 sm:h-4 fill-current" viewBox="0 0 24 24">
+                        <path d="M5 4l10 8-10 8V4zm12 0v16h2V4h-2z" />
+                    </svg>
                     Skip Intro
                 </button>
             )}
@@ -256,7 +258,8 @@ export default function CustomPlayer({
                                 onClick={() => setActiveMenu(activeMenu === 'season' ? 'none' : 'season')}
                                 className="flex items-center gap-1 sm:gap-2 bg-black/50 hover:bg-black/70 border border-white/20 text-white rounded-md px-2 py-1 sm:px-3 sm:py-1.5 transition-colors backdrop-blur-md font-medium text-[10px] sm:text-sm"
                             >
-                                {seasons[currentSeasonIndex || 0]?.season_name || `Season ${meta?.season || 1}`}
+                                {/* 👇 FIX SEASON TEXT (Button) 👇 */}
+                                {seasons[currentSeasonIndex || 0]?.season_name || seasons[currentSeasonIndex || 0]?.name || `Season ${meta?.season || currentSeasonIndex! + 1 || 1}`}
                                 <svg className={`w-3 h-3 sm:w-4 sm:h-4 transition-transform duration-200 ${activeMenu === 'season' ? 'rotate-180' : ''}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                     <path strokeLinecap="round" strokeLinejoin="round" d="M6 9l6 6 6-6" />
                                 </svg>
@@ -273,7 +276,8 @@ export default function CustomPlayer({
                                             }}
                                             className={`w-full text-left px-3 py-2 sm:px-4 sm:py-3 text-[10px] sm:text-sm transition-colors flex items-center justify-between ${idx === currentSeasonIndex ? 'bg-white/20 text-white font-bold' : 'text-gray-300 hover:bg-white/10'}`}
                                         >
-                                            <span className="truncate">{s.season_name || `Season ${s.season_number}`}</span>
+                                            {/* 👇 FIX SEASON TEXT (List) 👇 */}
+                                            <span className="truncate">{s.season_name || s.name || `Season ${s.season_number || idx + 1}`}</span>
                                             {idx === currentSeasonIndex && <div className="w-1.5 h-1.5 rounded-full bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.8)]" />}
                                         </button>
                                     ))}
@@ -311,17 +315,31 @@ export default function CustomPlayer({
                 <div className="w-full flex flex-col gap-2 sm:gap-4 pointer-events-auto">
                     <div className="flex justify-between items-end gap-2">
 
-                        <div className="text-white flex-1 min-w-0 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] pb-1 sm:pb-0">
-                            <h3 className="text-[10px] sm:text-sm font-medium text-gray-200 mb-0.5 sm:mb-1 line-clamp-1">{meta?.title}</h3>
-                            <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 text-[9px] sm:text-xs text-gray-300 mb-0.5 sm:mb-2">
-                                <span>Season {meta?.season}</span>
-                                <span className="border border-gray-400 px-1 rounded bg-black/20">16+</span>
-                                <span className="hidden sm:inline">{meta?.year}</span>
-                                <span className="hidden sm:inline">• {meta?.genre}</span>
-                                <span className="border border-gray-400 px-1 rounded bg-black/20">{meta?.qualityTag}</span>
+                        {/* 👇 FIX METADATA: Dibatasi lebarnya & dibenerin line-clamp-nya 👇 */}
+                        <div className="text-white flex-1 min-w-0 max-w-[75%] md:max-w-[60%] lg:max-w-2xl drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] pb-1 sm:pb-0">
+
+                            {/* Judul Series (dibuat truncate biar ga turun baris) */}
+                            <h3 className="text-[10px] sm:text-sm font-medium text-gray-200 mb-0.5 sm:mb-1 truncate">{meta?.title}</h3>
+
+                            {/* Info & Tags: Dijadiin 1 baris, kalo kepanjangan bakal di-truncate, bukan turun ke bawah */}
+                            <div className="flex items-center gap-1.5 sm:gap-2 text-[9px] sm:text-xs text-gray-300 mb-0.5 sm:mb-2 overflow-hidden whitespace-nowrap">
+                                <span className="shrink-0">Season {meta?.season}</span>
+                                <span className="shrink-0 border border-gray-400 px-1 rounded bg-black/20">16+</span>
+                                <span className="hidden sm:inline shrink-0">{meta?.year}</span>
+                                <span className="hidden sm:inline shrink-0">•</span>
+                                <span className="hidden sm:inline truncate">{meta?.genre}</span>
+                                <span className="shrink-0 border border-gray-400 px-1 rounded bg-black/20">{meta?.qualityTag}</span>
                             </div>
-                            <h1 className="text-base sm:text-3xl md:text-4xl font-bold mb-1 sm:mb-2 drop-shadow-lg line-clamp-1">{meta?.episodeTitle}</h1>
-                            <p className="hidden md:block text-sm text-gray-300 line-clamp-2 pr-4">{meta?.description}</p>
+
+                            {/* Judul Episode */}
+                            <h1 className="text-base sm:text-3xl md:text-4xl font-bold mb-1 sm:mb-2 drop-shadow-lg truncate">{meta?.episodeTitle}</h1>
+
+                            {/* Deskripsi: Dibungkus div terpisah buat ngakalin bug line-clamp Tailwind */}
+                            <div className="hidden md:block pr-4">
+                                <p className="text-xs sm:text-sm text-gray-300 line-clamp-2 leading-relaxed">
+                                    {meta?.description}
+                                </p>
+                            </div>
                         </div>
 
                         <div className="flex items-center gap-1 sm:gap-4 text-white relative shrink-0">
@@ -353,8 +371,9 @@ export default function CustomPlayer({
                                 )}
                             </button>
 
+                            {/* --- POP-UP MENU: AUDIO & SUBTITLES --- */}
                             {activeMenu === 'audioSub' && (
-                                <div className="absolute bottom-full right-0 sm:right-10 mb-4 sm:mb-6 w-[280px] sm:w-96 bg-black/95 backdrop-blur-md rounded-lg border border-white/10 p-3 sm:p-4 flex gap-4 sm:gap-6 z-50 shadow-2xl max-h-[140px] sm:max-h-[350px]">
+                                <div className="absolute bottom-full right-0 sm:right-10 mb-4 sm:mb-6 w-[280px] sm:w-96 bg-black/95 backdrop-blur-md rounded-lg border border-white/10 p-3 sm:p-4 flex gap-4 sm:gap-6 z-50 shadow-2xl max-h-[160px] sm:max-h-[220px]">
                                     <div className="flex-1 flex flex-col min-h-0">
                                         <div className="text-[11px] sm:text-sm font-bold text-gray-300 mb-2 border-b border-white/20 pb-1 shrink-0">Audio</div>
                                         <div className="flex-1 overflow-y-auto custom-scrollbar pr-2 min-h-0">
@@ -378,8 +397,9 @@ export default function CustomPlayer({
                                 </div>
                             )}
 
+                            {/* --- POP-UP MENU: SETTINGS (SPEED & QUALITY) --- */}
                             {activeMenu === 'settings' && (
-                                <div className="absolute bottom-full right-0 mb-4 sm:mb-6 w-[260px] sm:w-80 bg-black/95 backdrop-blur-md rounded-lg border border-white/10 p-3 sm:p-4 flex gap-4 sm:gap-6 z-50 shadow-2xl max-h-[140px] sm:max-h-[350px]">
+                                <div className="absolute bottom-full right-0 mb-4 sm:mb-6 w-[260px] sm:w-80 bg-black/95 backdrop-blur-md rounded-lg border border-white/10 p-3 sm:p-4 flex gap-4 sm:gap-6 z-50 shadow-2xl max-h-[160px] sm:max-h-[220px]">
                                     <div className="flex-1 flex flex-col min-h-0">
                                         <div className="text-[11px] sm:text-sm font-bold text-gray-300 mb-2 border-b border-white/20 pb-1 shrink-0">Speed</div>
                                         <div className="flex-1 overflow-y-auto custom-scrollbar pr-2 min-h-0">

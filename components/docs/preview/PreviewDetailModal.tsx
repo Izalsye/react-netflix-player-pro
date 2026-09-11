@@ -71,6 +71,7 @@ export default function PreviewDetailModal({
                                         subtitles={parsedMedia.subtitles}
                                         licenseServers={parsedMedia.licenseServers}
                                         customData={parsedMedia.customData}
+                                        qualities={parsedMedia.qualities} // 🔥 INI YANG BIKIN MENUNYA NONGOL!
                                         provider={providerId}
                                         audioConf={parsedMedia.audioConf}
                                         onBack={onClosePlayer}
