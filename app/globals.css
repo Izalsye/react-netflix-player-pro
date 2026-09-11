@@ -1,0 +1,47 @@
+@import "tailwindcss";
+
+/* Tambahin baris ini biar class "dark:" jalan saat kita toggle */
+@custom-variant dark (&:where(.dark, .dark *));
+
+@layer utilities {
+  /* Untuk Firefox */
+  .custom-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: #cbd5e1 transparent;
+  }
+
+  /* Untuk Firefox (Mode Gelap) */
+  .dark .custom-scrollbar {
+    scrollbar-color: #334155 transparent;
+  }
+
+  /* Untuk Chrome, Safari, Edge */
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 5px; /* Bikin langsing */
+    height: 5px;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background-color: #cbd5e1; /* Warna slate-300 */
+    border-radius: 20px;
+  }
+
+  /* Hover state mode terang */
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background-color: #94a3b8; /* Warna slate-400 */
+  }
+
+  /* Warna saat Mode Gelap */
+  .dark .custom-scrollbar::-webkit-scrollbar-thumb {
+    background-color: #334155; /* Warna slate-700 */
+  }
+
+  /* Hover state mode gelap */
+  .dark .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background-color: #475569; /* Warna slate-600 */
+  }
+}

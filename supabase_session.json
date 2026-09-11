@@ -1,0 +1,66 @@
+{
+  "access_token": "eyJhbGciOiJIUzI1NiIsImtpZCI6IlVDTTZmSWJpRFBLc2ZmK2siLCJ0eXAiOiJKV1QifQ.eyJpc3MiOiJodHRwczovL3d5ZWtoZnByb2hiYW1paGl6bnN1LnN1cGFiYXNlLmNvL2F1dGgvdjEiLCJzdWIiOiI3NTY2ZmI4MC1jZDg2LTQxN2ItYTUzNS1kODhkYWUxOGY4ZmMiLCJhdWQiOiJhdXRoZW50aWNhdGVkIiwiZXhwIjoxNzc2OTU0NTIwLCJpYXQiOjE3NzY5NTA5MjAsImVtYWlsIjoia2Vteml1bWl0YUBnbWFpbC5jb20iLCJwaG9uZSI6IiIsImFwcF9tZXRhZGF0YSI6eyJwcm92aWRlciI6Imdvb2dsZSIsInByb3ZpZGVycyI6WyJnb29nbGUiXX0sInVzZXJfbWV0YWRhdGEiOnsiYXZhdGFyX3VybCI6Imh0dHBzOi8vbGgzLmdvb2dsZXVzZXJjb250ZW50LmNvbS9hL0FDZzhvY0lLQUJjR0RHcDBjYldtYjE5d2dramRTdWV1S2FTcUlFemRmRHpSaWR2dXppamNZUT1zOTYtYyIsImJhbm5lZCI6ZmFsc2UsImVtYWlsIjoia2Vteml1bWl0YUBnbWFpbC5jb20iLCJlbWFpbF92ZXJpZmllZCI6dHJ1ZSwiZnVsbF9uYW1lIjoia2VtemkgVW1pdGEiLCJpc3MiOiJodHRwczovL2FjY291bnRzLmdvb2dsZS5jb20iLCJuYW1lIjoia2VtemkgVW1pdGEiLCJwaG9uZV92ZXJpZmllZCI6ZmFsc2UsInBpY3R1cmUiOiJodHRwczovL2xoMy5nb29nbGV1c2VyY29udGVudC5jb20vYS9BQ2c4b2NJS0FCY0dER3AwY2JXbWIxOXdna2pkU3VldUthU3FJRXpkZkR6UmlkdnV6aWpjWVE9czk2LWMiLCJwcm92aWRlcl9pZCI6IjEwOTUxMjAzMjI0NDQ5MTQ1NjAzOCIsInB1cmNoYXNlZF9saW1pdHMiOjAsInJlbWFpbmluZ19saW1pdHMiOjMsInJvbGUiOiJiYXNpYyIsInN1YiI6IjEwOTUxMjAzMjI0NDQ5MTQ1NjAzOCJ9LCJyb2xlIjoiYXV0aGVudGljYXRlZCIsImFhbCI6ImFhbDEiLCJhbXIiOlt7Im1ldGhvZCI6Im9hdXRoIiwidGltZXN0YW1wIjoxNzc2OTQ5ODE3fV0sInNlc3Npb25faWQiOiIxMjhmMTViZS0yZTRiLTQwNjYtYTc0NS1mN2FmMmU3NDQyYWUiLCJpc19hbm9ueW1vdXMiOmZhbHNlfQ.-8O61I9lKGFn7MqieVb_D8Un_8oe2sdLCjh5D9S4OmQ",
+  "token_type": "bearer",
+  "expires_in": 3600,
+  "expires_at": 1776954520,
+  "refresh_token": "n4ondwrd72zb",
+  "user": {
+    "id": "7566fb80-cd86-417b-a535-d88dae18f8fc",
+    "aud": "authenticated",
+    "role": "authenticated",
+    "email": "kemziumita@gmail.com",
+    "email_confirmed_at": "2026-04-21T17:04:15.235695Z",
+    "phone": "",
+    "confirmed_at": "2026-04-21T17:04:15.235695Z",
+    "last_sign_in_at": "2026-04-23T13:10:17.874529Z",
+    "app_metadata": {
+      "provider": "google",
+      "providers": [
+        "google"
+      ]
+    },
+    "user_metadata": {
+      "avatar_url": "https://lh3.googleusercontent.com/a/ACg8ocIKABcGDGp0cbWmb19wgkjdSueuKaSqIEzdfDzRidvuzijcYQ=s96-c",
+      "banned": false,
+      "email": "kemziumita@gmail.com",
+      "email_verified": true,
+      "full_name": "kemzi Umita",
+      "iss": "https://accounts.google.com",
+      "name": "kemzi Umita",
+      "phone_verified": false,
+      "picture": "https://lh3.googleusercontent.com/a/ACg8ocIKABcGDGp0cbWmb19wgkjdSueuKaSqIEzdfDzRidvuzijcYQ=s96-c",
+      "provider_id": "109512032244491456038",
+      "purchased_limits": 0,
+      "remaining_limits": 3,
+      "role": "basic",
+      "sub": "109512032244491456038"
+    },
+    "identities": [
+      {
+        "identity_id": "431ffcc6-e7ef-488d-b6ac-49b93fd2a47c",
+        "id": "109512032244491456038",
+        "user_id": "7566fb80-cd86-417b-a535-d88dae18f8fc",
+        "identity_data": {
+          "avatar_url": "https://lh3.googleusercontent.com/a/ACg8ocIKABcGDGp0cbWmb19wgkjdSueuKaSqIEzdfDzRidvuzijcYQ=s96-c",
+          "email": "kemziumita@gmail.com",
+          "email_verified": true,
+          "full_name": "kemzi Umita",
+          "iss": "https://accounts.google.com",
+          "name": "kemzi Umita",
+          "phone_verified": false,
+          "picture": "https://lh3.googleusercontent.com/a/ACg8ocIKABcGDGp0cbWmb19wgkjdSueuKaSqIEzdfDzRidvuzijcYQ=s96-c",
+          "provider_id": "109512032244491456038",
+          "sub": "109512032244491456038"
+        },
+        "provider": "google",
+        "last_sign_in_at": "2026-04-21T17:04:15.21628Z",
+        "created_at": "2026-04-21T17:04:15.216336Z",
+        "updated_at": "2026-04-23T13:10:15.519233Z",
+        "email": "kemziumita@gmail.com"
+      }
+    ],
+    "created_at": "2026-04-21T17:04:15.124886Z",
+    "updated_at": "2026-04-23T13:28:40.865033Z",
+    "is_anonymous": false
+  }
+}

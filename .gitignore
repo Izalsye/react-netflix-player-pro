@@ -1,0 +1,16 @@
+node_modules/
+.next/
+coverage/
+.DS_Store
+*.log
+!.env.example
+# .gitignore
+.env
+.env.local
+.env.production
+
+# Mengabaikan folder rahasia dapur lu
+/app/api/
+/lib/
+# (Opsional) Kalau ada file spesifik di lib yang mau di-ignore
+# /lib/rahasia-api.ts

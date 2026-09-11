@@ -1,0 +1,125 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+}
+
+// --- TABEL BARU: MASTER DATA PLAN (PAKET VIP) ---
+model Plan {
+  id           String   @id @default(cuid())
+  code         String   @unique // cth: "1_MONTH", "6_MONTHS"
+  name         String   // cth: "1 Bulan", "6 Bulan"
+  price        Int      // cth: 20000, 90000
+  limitPerDay  Int      @default(1000000) // Limit per hari untuk paket ini
+  durationDays Int      // cth: 30, 180 (Buat hitung otomatis subEndsAt)
+  isActive     Boolean  @default(true) // Kalau false, paket gak muncul di UI
+  createdAt    DateTime @default(now())
+
+  // Relasi balik
+  users        User[]
+  transactions Transaction[]
+}
+
+model ApiStat {
+  id        Int      @id @default(autoincrement())
+  visitorId String
+  endpoint  String
+  method    String
+  createdAt DateTime @default(now())
+
+  @@index([endpoint])
+  @@index([visitorId])
+}
+
+// --- TABEL: USER (ROMBAK TOTAL UNTUK WEB & TELEGRAM) ---
+model User {
+  id           String   @id @default(cuid()) 
+  
+  telegramId   String?  @unique 
+
+  // Data Profil
+  firstName    String
+  lastName     String?
+  username     String?
+  languageCode String?
+  isBot        Boolean  @default(false)
+  isPremium    Boolean  @default(false) 
+
+  // --- KONTROL SISTEM INTERNAL INDOCAST ---
+  role         String   @default("FREE") 
+  status       String   @default("ACTIVE") 
+  
+  // --- SISTEM LANGGANAN / PLAN (SUDAH DIRELASIKAN) ---
+  planId       String?  // Foreign key ke tabel Plan
+  plan         Plan?    @relation(fields: [planId], references: [id])
+  
+  subStartsAt  DateTime? 
+  subEndsAt    DateTime? 
+
+  lastActiveAt DateTime @default(now())
+  createdAt    DateTime @default(now())
+
+  // --- RELASI ---
+  apiKey       ApiKey?
+  usages       DailyUsage[] 
+  transactions Transaction[]
+}
+
+// --- TABEL TRACKING KUOTA HARIAN ---
+model DailyUsage {
+  id        Int      @id @default(autoincrement())
+  userId    String
+  date      DateTime @db.Date 
+  count     Int      @default(0) 
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, date]) 
+}
+
+model ApiKey {
+  id        Int      @id @default(autoincrement())
+  userId    String   @unique  
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  hashedKey String   @unique
+  rawKey    String?  
+  label     String?
+  createdAt DateTime @default(now())
+  expiresAt DateTime? 
+
+  @@index([hashedKey])
+}
+
+model PrimeEnvelope {
+  shortId      String   @id
+  envelope     String   @db.Text
+  handoffToken String?  @db.Text 
+  expiresAt    DateTime
+}
+
+// --- TABEL: TRANSAKSI MIDTRANS (SUDAH DIRELASIKAN KE PLAN) ---
+model Transaction {
+  id            String    @id @default(cuid()) 
+  
+  userId        String
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Relasi ke Plan yang dibeli
+  planId        String
+  plan          Plan      @relation(fields: [planId], references: [id])
+  
+  amount        Int       
+  status        String    @default("PENDING") 
+  paymentMethod String    @default("QRIS")
+  qrisUrl       String?   @db.Text 
+  
+  paidAt        DateTime? 
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt 
+
+  @@index([userId])
+  @@index([planId])
+}
