@@ -41,8 +41,8 @@ If you want to build a fully functional streaming platform, the premium source c
 📩 **Interested in buying the full source code?**
 Contact me to get the pricing and full demo:
 
-* **Email**: [Email Lu Di Sini]
-* **Telegram**: [@UsernameLu]
+* **Email**: [cyberdeveloper17@gmail.com]
+* **Telegram**: [@Faisal_Nw16]
 
 ---
 
