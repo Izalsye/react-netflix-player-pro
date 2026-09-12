@@ -128,12 +128,66 @@ export function useVideoEngine(
                 injectNativeSubtitles(); // Inject subtitle native mp4
             }
             else if (isWeTv && Hls.isSupported()) {
-                const hls = new Hls();
+                // 🔥 1. CONFIG DEWA HASIL COPY DARI EXPRESS LU 🔥
+                const hls = new Hls({
+                    maxBufferLength: 60,
+                    maxMaxBufferLength: 120,
+                    maxBufferHole: 5,
+                    highBufferWatchdogPeriod: 2,
+                    nudgeOffset: 0.5,
+                    nudgeMaxRetry: 20,
+                    enableWorker: true,
+                    lowLatencyMode: false,
+                    progressive: false,
+                    startFragPrefetch: true,
+                    fragLoadingTimeOut: 30000,
+                    fragLoadingMaxRetry: 6,
+                    fragLoadingRetryDelay: 1000,
+                    levelLoadingTimeOut: 15000,
+                    manifestLoadingTimeOut: 15000,
+                    // xhrSetup: function (xhr) {
+                    //     xhr.withCredentials = false;
+                    // }
+                });
+
                 hlsRef.current = hls;
+
+                // 🔥 2. PENANGKAL ERROR SAKTI (Official Recovery Pattern) 🔥
+                let recoverDecodingErrorDate = 0;
+
+                hls.on(Hls.Events.ERROR, (_, d) => {
+                    if (d.fatal) {
+                        if (d.type === Hls.ErrorTypes.MEDIA_ERROR) {
+                            const now = performance.now();
+                            // Cegah Infinite Loop: Kasih jeda 3 detik tiap recovery
+                            if (now - recoverDecodingErrorDate > 3000) {
+                                recoverDecodingErrorDate = now;
+                                console.warn('🎬 [HLS.js] Media error cacat WeTV, recovering...');
+                                hls.recoverMediaError();
+                            } else {
+                                // Kalau masih error juga, tuker codec audionya (Jurus Pamungkas HLS.js)
+                                console.warn('🎬 [HLS.js] Media error bandel, Swapping Audio Codec...');
+                                hls.swapAudioCodec();
+                                hls.recoverMediaError();
+                            }
+                        } else if (d.type === Hls.ErrorTypes.NETWORK_ERROR) {
+                            console.warn('🌐 [HLS.js] Network error, loading ulang...');
+                            // Kasih jeda dikit biar CDN nggak ngambek
+                            setTimeout(() => hls.startLoad(), 1000);
+                        } else {
+                            console.error('💥 [HLS.js] Error Fatal, Destroying...');
+                            hls.destroy();
+                        }
+                    } else if (d.details === 'bufferStalledError') {
+                        // Benerin buffer nyangkut (non-fatal)
+                        hls.recoverMediaError();
+                    }
+                });
+
                 hls.loadSource(internalSrc);
                 hls.attachMedia(video);
+
                 hls.on(Hls.Events.MANIFEST_PARSED, () => {
-                    // Kalau WeTV ga ngasih array URL resolusi, baru ambil dari HLS m3u8
                     if (!qualities || qualities.length === 0) {
                         const levels = hls.levels.map((l: any, i: number) => ({ id: i, label: `${l.height}p`, height: l.height }));
                         setAvailableQualities([{ id: 'auto', label: 'Auto', active: true }, ...levels.sort((a, b) => b.height - a.height)]);
