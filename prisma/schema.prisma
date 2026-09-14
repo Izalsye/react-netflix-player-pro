@@ -123,3 +123,9 @@ model Transaction {
   @@index([userId])
   @@index([planId])
 }
+
+model IqiyiCache {
+  slug      String   @id
+  m3u8      String   @db.LongText  // 👈 UBAH BAGIAN INI
+  expiresAt DateTime
+}

@@ -16,7 +16,7 @@ if (globalForPrisma.prisma) {
         password: process.env.DATABASE_PASSWORD,
         database: process.env.DATABASE_NAME,
         port: Number(process.env.DATABASE_PORT) || 3306,
-        connectionLimit: 10,
+        connectionLimit: 100, // <--- NAIKKAN JADI 100
     });
 
     // 2. Buat instance Prisma
