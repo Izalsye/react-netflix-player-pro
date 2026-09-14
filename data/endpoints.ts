@@ -858,20 +858,89 @@ export const providers: Record<string, ProviderConfig> = {
         tagColor: "bg-green-500/20 text-green-400",
         endpoints: [
           {
+            id: "lang",
+            name: "Languages",
+            method: "GET",
+            path: "/api/iqiyi/lang",
+            description: "Get list of supported languages for iQIYI API",
+            params: [] // Kosongin aja karena gak butuh parameter buat get list bahasanya
+          },
+          {
             id: "home",
             name: "Home",
             method: "GET",
             path: "/api/iqiyi/home",
             description: "Get home page data for iqiyi",
-            params: []
+            params: [
+              { name: "page", type: "string", required: false, default: "1", in: "query" },
+              { name: "lang", type: "string", required: false, default: "id_id", in: "query" }
+            ]
           },
           {
             id: "trending",
-            name: "Trending",
+            name: "Trending / Ranking",
             method: "GET",
             path: "/api/iqiyi/trending",
-            description: "Get trending page data for iqiyi",
-            params: []
+            description: "Get trending/ranking page data for iqiyi",
+            params: [
+              { name: "page", type: "string", required: false, default: "1", in: "query" },
+              { name: "lang", type: "string", required: false, default: "id_id", in: "query" }
+            ]
+          },
+          {
+            id: "drama",
+            name: "Drama",
+            method: "GET",
+            path: "/api/iqiyi/drama",
+            description: "Get drama page data for iqiyi",
+            params: [
+              { name: "page", type: "string", required: false, default: "1", in: "query" },
+              { name: "lang", type: "string", required: false, default: "id_id", in: "query" }
+            ]
+          },
+          {
+            id: "kdrama",
+            name: "K-Drama",
+            method: "GET",
+            path: "/api/iqiyi/kdrama",
+            description: "Get K-Drama page data for iqiyi",
+            params: [
+              { name: "page", type: "string", required: false, default: "1", in: "query" },
+              { name: "lang", type: "string", required: false, default: "id_id", in: "query" }
+            ]
+          },
+          {
+            id: "movie",
+            name: "Movie",
+            method: "GET",
+            path: "/api/iqiyi/movie",
+            description: "Get movie page data for iqiyi",
+            params: [
+              { name: "page", type: "string", required: false, default: "1", in: "query" },
+              { name: "lang", type: "string", required: false, default: "id_id", in: "query" }
+            ]
+          },
+          {
+            id: "anime",
+            name: "Anime",
+            method: "GET",
+            path: "/api/iqiyi/anime",
+            description: "Get anime page data for iqiyi",
+            params: [
+              { name: "page", type: "string", required: false, default: "1", in: "query" },
+              { name: "lang", type: "string", required: false, default: "id_id", in: "query" }
+            ]
+          },
+          {
+            id: "variety",
+            name: "Variety Show",
+            method: "GET",
+            path: "/api/iqiyi/variety",
+            description: "Get variety show page data for iqiyi",
+            params: [
+              { name: "page", type: "string", required: false, default: "1", in: "query" },
+              { name: "lang", type: "string", required: false, default: "id_id", in: "query" }
+            ]
           },
           {
             id: "search",

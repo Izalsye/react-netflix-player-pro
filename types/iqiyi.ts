@@ -24,7 +24,6 @@ export interface NormalizedItem {
     slug: string;
     overview: string;
     tagline?: string | null;
-    // 🎯 Hapus posterPath, backdropPath, logoPath, ganti dengan ini:
     banner: ItemBanner | null;
     cover: ItemCover | null;
     releaseDate: string | null;
@@ -48,6 +47,7 @@ export interface Section {
 export interface NormalizedHomeResponse {
     sliderItems?: NormalizedItem[];
     sections: Section[];
+    hasNextPage?: boolean; // 🎯 Buat penanda pagination di frontend
 }
 
 // --- RAW NEXT.JS / PCW API TYPES ---
@@ -68,19 +68,34 @@ export interface PcwBlock {
         channel_id?: string;
         is_exclusive?: string;
         loc_Suffix_play?: string;
-        loc_suffix_album?: string; // 🎯 TAMBAHAN BARU DI SINI
+        loc_suffix_album?: string;
     };
+}
+
+// 🎯 TAMBAHAN BARU: Tipe data untuk Banner Title (Judul Section)
+export interface PcwTopBanner {
+    title?: string;
+    block_type?: string;
+    image?: { url: string };
+}
+
+// 🎯 TAMBAHAN BARU: Tipe data untuk Base (Info Pagination)
+export interface PcwBase {
+    has_next?: number;
+    next_url?: string;
 }
 
 export interface PcwCard {
     id: string;
     name: string;
     card_type: string;
+    top_banner?: PcwTopBanner[]; // 🎯 Didaftarkan ke card
     blocks?: PcwBlock[];
 }
 
 export interface PcwCommonResponse {
     code: number;
+    base?: PcwBase; // 🎯 Didaftarkan ke response utama
     cards?: PcwCard[];
 }
 
@@ -136,7 +151,6 @@ export interface IqiyiDetailResponse {
     originalTitle: string;
     slug: string;
     overview: string;
-    // 🎯 Sesuaikan juga di Detail Response
     banner: ItemBanner | null;
     cover: ItemCover | null;
     releaseDate: string;

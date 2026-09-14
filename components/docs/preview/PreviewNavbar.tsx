@@ -179,34 +179,34 @@ export default function PreviewNavbar({ provider, endpoints, apiMenus, activeEnd
                         </div>
                     </div>
 
-                    {/* Dropdown Bahasa */}
-                    <div className="relative flex items-center">
-                        <button
-                            onClick={() => setIsLangOpen(!isLangOpen)}
-                            className="flex items-center gap-1.5 hover:text-white transition-colors text-sm font-bold uppercase"
-                        >
-                            <Globe size={18} /> {lang} <ChevronDown size={14} />
-                        </button>
-                        {isLangOpen && (
-                            <>
-                                <div className="fixed inset-0 z-40" onClick={() => setIsLangOpen(false)} />
-                                <div className="absolute right-0 top-8 w-32 bg-[#151822] border border-white/10 rounded-lg shadow-xl z-50 py-1 text-xs font-bold max-h-64 overflow-y-auto custom-scrollbar">
-                                    {availableLangs && availableLangs.length > 0 ? (
-                                        availableLangs.map(l => (
-                                            <button key={l.code} onClick={() => { onLangChange(l.code); setIsLangOpen(false); }} className="w-full text-left px-4 py-2 hover:bg-white/10 text-white">
+                    {/* Dropdown Bahasa - HANYA MUNCUL JIKA ADA DATA availableLangs */}
+                    {availableLangs && availableLangs.length > 0 && (
+                        <div className="relative flex items-center">
+                            <button
+                                onClick={() => setIsLangOpen(!isLangOpen)}
+                                className="flex items-center gap-1.5 hover:text-white transition-colors text-sm font-bold uppercase"
+                            >
+                                <Globe size={18} /> {lang.split('_')[0]} <ChevronDown size={14} />
+                            </button>
+
+                            {isLangOpen && (
+                                <>
+                                    <div className="fixed inset-0 z-40" onClick={() => setIsLangOpen(false)} />
+                                    <div className="absolute right-0 top-8 w-36 bg-[#151822] border border-white/10 rounded-lg shadow-xl z-50 py-1 text-xs font-bold max-h-64 overflow-y-auto custom-scrollbar">
+                                        {availableLangs.map(l => (
+                                            <button
+                                                key={l.code}
+                                                onClick={() => { onLangChange(l.code); setIsLangOpen(false); }}
+                                                className={`w-full text-left px-4 py-2 hover:bg-white/10 transition-colors ${lang === l.code ? 'text-[var(--primary)] bg-white/5' : 'text-white'}`}
+                                            >
                                                 {l.name}
                                             </button>
-                                        ))
-                                    ) : (
-                                        <>
-                                            <button onClick={() => { onLangChange('id'); setIsLangOpen(false); }} className="w-full text-left px-4 py-2 hover:bg-white/10 text-white">Indonesia</button>
-                                            <button onClick={() => { onLangChange('en'); setIsLangOpen(false); }} className="w-full text-left px-4 py-2 hover:bg-white/10 text-white">English</button>
-                                        </>
-                                    )}
-                                </div>
-                            </>
-                        )}
-                    </div>
+                                        ))}
+                                    </div>
+                                </>
+                            )}
+                        </div>
+                    )}
 
                     {/* Profil & Logout */}
                     {apiKey ? (

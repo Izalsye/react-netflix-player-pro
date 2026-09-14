@@ -30,7 +30,7 @@ export default function PreviewTab({ providerId, apiKey, isStandalone = false }:
     const [lang, setLang] = useState('id');
     const [availableLangs, setAvailableLangs] = useState<{ code: string, name: string }[]>([]);
     const [navMenus, setNavMenus] = useState<PreviewMenu[]>([]);
-    
+
     const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
     const [page, setPage] = useState<number>(1);
     const [isLoadingMore, setIsLoadingMore] = useState(false);
@@ -73,14 +73,24 @@ export default function PreviewTab({ providerId, apiKey, isStandalone = false }:
 
     useEffect(() => {
         if (!apiKey || !providerConfig) return;
-        const langEndpoint = allEndpoints.find(e => e.id === 'lang');
+        // Pindahkan pencarian endpoint ke dalam agar aman
+        const langEndpoint = (providerConfig?.groups.flatMap(g => g.endpoints) || []).find((e: any) => e.id === 'lang');
+
         if (langEndpoint) {
             fetch(langEndpoint.path, { headers: { 'x-api-key': apiKey } })
                 .then(res => res.json())
-                .then(data => { if (data?.data && Array.isArray(data.data)) setAvailableLangs(data.data); })
+                .then(data => {
+                    if (data?.data && Array.isArray(data.data)) {
+                        const mappedLangs = data.data.map((l: any) => ({
+                            code: l.code,
+                            name: l.native || l.label || l.name || l.code
+                        }));
+                        setAvailableLangs(mappedLangs);
+                    }
+                })
                 .catch(err => console.error("Gagal fetch lang:", err));
         }
-    }, [providerId, apiKey]);
+    }, [providerId, apiKey]); // ✅ HAPUS allEndpoints DARI SINI // tambah allEndpoints ke dependency
 
     // Fetch WeTV Filters
     useEffect(() => {
@@ -92,12 +102,12 @@ export default function PreviewTab({ providerId, apiKey, isStandalone = false }:
                 .then(data => {
                     if (data?.data && Array.isArray(data.data)) {
                         // Data dari JSON API Lu (data.filters, bukan data.data lagi)
-                        const filterList = data.filters || data.data; 
-                        
+                        const filterList = data.filters || data.data;
+
                         setWetvFilters(filterList);
                         const initialActive: Record<string, string> = {};
                         filterList.forEach((f: any) => {
-                            if(f.options && f.options.length > 0) initialActive[f.paramKey] = f.options[0].value;
+                            if (f.options && f.options.length > 0) initialActive[f.paramKey] = f.options[0].value;
                         });
                         setActiveWetvFilters(initialActive);
                     }
@@ -119,7 +129,7 @@ export default function PreviewTab({ providerId, apiKey, isStandalone = false }:
             const baseUrl = buildUrl(baseEndpoint, reqConfig.params, currentLang, targetPage);
             const baseRes = await fetch(baseUrl, { headers: { 'x-api-key': apiKey } });
             const baseRaw = await baseRes.json();
-            
+
             let gridRaw = null;
             if (reqConfig.gridEndpointId && isLoadMore === false) {
                 const gridEndpoint = allEndpoints.find(e => e.id === reqConfig.gridEndpointId);
@@ -134,7 +144,7 @@ export default function PreviewTab({ providerId, apiKey, isStandalone = false }:
                     const gridUrl = buildUrl(gridEndpoint, reqConfig.params, currentLang, targetPage);
                     const gridRes = await fetch(gridUrl, { headers: { 'x-api-key': apiKey } });
                     gridRaw = await gridRes.json();
-                    baseRaw.data = null; 
+                    baseRaw.data = null;
                 }
             }
 
@@ -257,7 +267,7 @@ export default function PreviewTab({ providerId, apiKey, isStandalone = false }:
             )}
 
             <div className={`relative w-full overflow-y-auto overflow-x-hidden custom-scrollbar bg-[#0B0E14] text-white shadow-2xl transition-all duration-300 ${isStandalone ? 'h-screen rounded-none border-none' : 'h-[800px] rounded-2xl border border-[#222634]'}`}>
-                
+
                 <PreviewNavbar
                     provider={providerConfig} endpoints={allEndpoints} apiMenus={navMenus.length > 0 ? navMenus : (feed?.menus || [])}
                     activeEndpoint={baseActiveEndpoint} lang={lang} onLangChange={setLang} apiKey={apiKey} availableLangs={availableLangs}
@@ -276,10 +286,10 @@ export default function PreviewTab({ providerId, apiKey, isStandalone = false }:
                     <div className="pb-12">
                         <PreviewHero banners={feed.banners} onCardClick={handleCardClick} />
                         <div className="space-y-6 md:space-y-10 pt-8">
-                            
+
                             {feed.sections.map((section, idx) => {
                                 const isGrid = (!feed.banners?.length && feed.sections.length === 1) || section.isGrid;
-                                
+
                                 // 🔥 TOMBOL FILTER UNTUK IDLIX & WETV 🔥
                                 const FilterBtn = (isIdlixCatalog || (isWeTVExplore && wetvFilters.length > 0)) ? (
                                     <button onClick={() => setIsFilterModalOpen(true)} className="flex items-center gap-2 px-4 py-1.5 bg-white/10 hover:bg-white/20 border border-white/10 rounded-full text-sm font-semibold transition-colors shadow-sm">
@@ -303,7 +313,7 @@ export default function PreviewTab({ providerId, apiKey, isStandalone = false }:
                                 </button>
                             </div>
                         )}
-                        
+
                         {feed?.sections.length === 0 && feed?.banners.length === 0 && (
                             <div className="w-full flex flex-col items-center justify-center py-32 text-slate-500">
                                 <p className="text-xl font-bold">Tidak ada konten ditemukan</p>
@@ -314,13 +324,13 @@ export default function PreviewTab({ providerId, apiKey, isStandalone = false }:
 
                 {/* MODALS EXTRACTED TO COMPONENTS */}
                 {pId === 'wetv' ? (
-                    <WeTVFilterModal isOpen={isFilterModalOpen} onClose={() => setIsFilterModalOpen(false)} filters={wetvFilters} activeFilters={activeWetvFilters} onChange={(k, v) => setActiveWetvFilters(prev => ({...prev, [k]: v}))} onApply={handleApplyWetvFilter} />
+                    <WeTVFilterModal isOpen={isFilterModalOpen} onClose={() => setIsFilterModalOpen(false)} filters={wetvFilters} activeFilters={activeWetvFilters} onChange={(k, v) => setActiveWetvFilters(prev => ({ ...prev, [k]: v }))} onApply={handleApplyWetvFilter} />
                 ) : (
                     <IdlixFilterModal isOpen={isFilterModalOpen} onClose={() => setIsFilterModalOpen(false)} onApply={handleApplyIdlixFilter} selectedSort={selectedSort} setSelectedSort={setSelectedSort} selectedGenre={selectedGenre} setSelectedGenre={setSelectedGenre} selectedCountry={selectedCountry} setSelectedCountry={setSelectedCountry} />
                 )}
-                
+
                 <PreviewDetailModal isOpen={isDetailOpen} onClose={() => setIsDetailOpen(false)} detailData={detailData} isLoading={isDetailLoading} providerId={providerConfig.id} playResult={playResult} isPlayLoading={isPlayLoading} playEndpointId={playEndpointId} onPlayVideo={handlePlayVideo} onClosePlayer={() => setPlayResult(null)} />
-                
+
             </div>
         </div>
     );
