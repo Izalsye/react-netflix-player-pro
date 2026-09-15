@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Copy, CheckCircle, Crown, Zap, Activity, Loader2, QrCode, X, Key, ArrowRight, Download } from 'lucide-react'; // 🎯 Tambah ikon Download
+import { Copy, CheckCircle, Crown, Zap, Activity, Loader2, QrCode, X, Key, ArrowRight, Download } from 'lucide-react';
 import { notify } from '@/lib/customToast';
 
 export default function DashboardPage() {
@@ -9,6 +9,9 @@ export default function DashboardPage() {
     const [userData, setUserData] = useState<any>(null);
     const [loading, setLoading] = useState(true);
     const [isCopied, setIsCopied] = useState(false);
+
+    // 🔥 STATE BARU UNTUK NYIMPEN DATA PLAN DARI DATABASE
+    const [plans, setPlans] = useState<any[]>([]);
 
     const [selectedPlan, setSelectedPlan] = useState<{ value: string; label: string; priceText: string } | null>(null);
     const [isPaymentLoading, setIsPaymentLoading] = useState(false);
@@ -22,6 +25,7 @@ export default function DashboardPage() {
         }
         setApiKey(savedKey);
         fetchUserData(savedKey);
+        fetchPlans(); // 🔥 Panggil fungsi fetch data plan
     }, []);
 
     const fetchUserData = async (key: string) => {
@@ -43,6 +47,21 @@ export default function DashboardPage() {
         }
     };
 
+    // 🔥 FUNGSI BARU BUAT AMBIL PLAN DARI DATABASE
+    const fetchPlans = async () => {
+        try {
+            const res = await fetch('/api/plans');
+            if (res.ok) {
+                const json = await res.json();
+                if (json.success) {
+                    setPlans(json.data);
+                }
+            }
+        } catch (error) {
+            console.error("Gagal mengambil data plan", error);
+        }
+    };
+
     const copyKey = () => {
         navigator.clipboard.writeText(apiKey);
         setIsCopied(true);
@@ -60,6 +79,7 @@ export default function DashboardPage() {
                     'Content-Type': 'application/json',
                     'x-api-key': apiKey
                 },
+                // value-nya dikirim pakai kode Plan dari DB (cth: "1_MONTH")
                 body: JSON.stringify({ planType: selectedPlan.value })
             });
             const json = await res.json();
@@ -67,18 +87,17 @@ export default function DashboardPage() {
             if (json.success) {
                 setQrisData({ url: json.data.qrisUrl, amount: json.data.amount, orderId: json.data.orderId });
                 setSelectedPlan(null);
-                notify.info('Doing OK', 'Tagihan berhasil dibuat. Silakan scan QRIS.'); // 🎯 Custom Toast
+                notify.info('Doing OK', 'Tagihan berhasil dibuat. Silakan scan QRIS.');
             } else {
-                notify.error('Pay Attention!', 'Gagal membuat tagihan: ' + json.error); // 🎯 Custom Toast
+                notify.error('Pay Attention!', 'Gagal membuat tagihan: ' + json.error);
             }
         } catch (error) {
-            notify.error('Pay Attention!', 'Terjadi kesalahan jaringan.'); // 🎯 Custom Toast
+            notify.error('Pay Attention!', 'Terjadi kesalahan jaringan.');
         } finally {
             setIsPaymentLoading(false);
         }
     };
 
-    // 🎯 FUNGSI DOWNLOAD GAMBAR QRIS
     const handleDownloadQris = async () => {
         if (!qrisData) return;
         try {
@@ -93,12 +112,10 @@ export default function DashboardPage() {
             document.body.removeChild(link);
             window.URL.revokeObjectURL(url);
         } catch (error) {
-            // Fallback kalau kena block CORS
             window.open(qrisData.url, '_blank');
         }
     };
 
-    // 🎯 FUNGSI POLLING (AUTO-SUCCESS): Mengecek status pembayaran setiap 3 detik
     useEffect(() => {
         let interval: NodeJS.Timeout;
 
@@ -113,22 +130,17 @@ export default function DashboardPage() {
                     if (json.status === 'SETTLEMENT') {
                         clearInterval(interval);
                         setQrisData(null);
-
-                        // 🎯 Ganti alert ini
                         notify.success('Doing Great!', 'Pembayaran Berhasil! Akun Anda sudah VIP.');
-
                         fetchUserData(apiKey);
                     } else if (json.status === 'EXPIRE') {
                         clearInterval(interval);
                         setQrisData(null);
-
-                        // 🎯 Ganti alert ini
                         notify.error('Pay Attention!', 'Waktu pembayaran habis.');
                     }
                 } catch (error) {
                     console.error("Gagal ngecek status:", error);
                 }
-            }, 3000); // Cek tiap 3 detik
+            }, 3000);
         }
 
         return () => {
@@ -171,7 +183,6 @@ export default function DashboardPage() {
 
                 {/* KIRI: STATS & API KEY */}
                 <div className="xl:col-span-2 space-y-6 lg:space-y-8">
-                    {/* ... (CARD KUOTA & API KEY TETAP SAMA KAYA PUNYA LU) ... */}
                     <div className="bg-white dark:bg-[#151822] border border-slate-200 dark:border-white/5 p-6 md:p-8 rounded-[2rem] shadow-sm relative overflow-hidden transition-colors duration-300">
                         <div className="flex items-center gap-3 mb-6">
                             <div className="w-12 h-12 rounded-2xl bg-[var(--primary)]/10 text-[var(--primary)] flex items-center justify-center">
@@ -238,26 +249,30 @@ export default function DashboardPage() {
                         </p>
 
                         <div className="space-y-3 relative z-10 flex-1">
-                            {[
-                                { label: '1 Bulan', value: '1_MONTH', priceText: 'Rp 45.000' },
-                                { label: '2 Bulan', value: '2_MONTHS', priceText: 'Rp 80.000' },
-                                { label: '3 Bulan', value: '3_MONTHS', priceText: 'Rp 105.000' },
-                                { label: '6 Bulan', value: '6_MONTHS', priceText: 'Rp 180.000' },
-                            ].map((plan) => (
-                                <button
-                                    key={plan.value}
-                                    onClick={() => setSelectedPlan(plan)}
-                                    className="w-full flex items-center justify-between p-4 rounded-2xl bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 hover:bg-slate-100 dark:hover:bg-white/10 hover:border-[var(--primary)] dark:hover:border-[var(--primary)] transition-all group active:scale-95 text-left"
-                                >
-                                    <div>
-                                        <div className="font-bold text-slate-900 dark:text-white text-sm">{plan.label}</div>
-                                        <div className="text-xs text-slate-500 dark:text-slate-400 font-medium">{plan.priceText}</div>
-                                    </div>
-                                    <div className="w-8 h-8 rounded-full bg-[var(--primary)]/10 flex items-center justify-center text-[var(--primary)] group-hover:bg-[var(--primary)] group-hover:text-white transition-colors">
-                                        <Zap size={14} />
-                                    </div>
-                                </button>
-                            ))}
+                            {/* 🔥 LOOPING DATA PLAN DARI DATABASE 🔥 */}
+                            {plans.length > 0 ? (
+                                plans.map((plan) => (
+                                    <button
+                                        key={plan.id}
+                                        onClick={() => setSelectedPlan({
+                                            value: plan.code,
+                                            label: plan.name,
+                                            priceText: `Rp ${plan.price.toLocaleString('id-ID')}`
+                                        })}
+                                        className="w-full flex items-center justify-between p-4 rounded-2xl bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 hover:bg-slate-100 dark:hover:bg-white/10 hover:border-[var(--primary)] dark:hover:border-[var(--primary)] transition-all group active:scale-95 text-left"
+                                    >
+                                        <div>
+                                            <div className="font-bold text-slate-900 dark:text-white text-sm">{plan.name}</div>
+                                            <div className="text-xs text-slate-500 dark:text-slate-400 font-medium">Rp {plan.price.toLocaleString('id-ID')}</div>
+                                        </div>
+                                        <div className="w-8 h-8 rounded-full bg-[var(--primary)]/10 flex items-center justify-center text-[var(--primary)] group-hover:bg-[var(--primary)] group-hover:text-white transition-colors">
+                                            <Zap size={14} />
+                                        </div>
+                                    </button>
+                                ))
+                            ) : (
+                                <div className="text-center text-sm text-slate-500 py-4">Memuat paket...</div>
+                            )}
                         </div>
                     </div>
                 </div>
@@ -335,13 +350,13 @@ export default function DashboardPage() {
                         </div>
 
                         <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-1">Scan QRIS</h3>
-                        <p className="text-sm text-slate-500 mb-6">Total Tagihan: <strong className="text-[var(--primary)] text-lg">Rp {qrisData.amount.toLocaleString()}</strong></p>
+                        <p className="text-sm text-slate-500 mb-6">Total Tagihan: <strong className="text-[var(--primary)] text-lg">Rp {qrisData.amount.toLocaleString('id-ID')}</strong></p>
 
                         <div className="bg-white p-2 rounded-2xl border border-slate-200 mx-auto w-fit mb-4 shadow-sm relative group">
                             <img src={qrisData.url} alt="QRIS Midtrans" className="w-48 h-48 object-contain" />
                         </div>
 
-                        {/* 🎯 TOMBOL DOWNLOAD QRIS 🎯 */}
+                        {/* TOMBOL DOWNLOAD QRIS */}
                         <button
                             onClick={handleDownloadQris}
                             className="w-full flex items-center justify-center gap-2 mb-6 py-2.5 bg-slate-100 hover:bg-slate-200 dark:bg-white/5 dark:hover:bg-white/10 rounded-xl text-slate-700 dark:text-slate-300 font-bold text-sm transition-colors"

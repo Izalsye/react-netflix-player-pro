@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Menu, Play, Search, Bell, UserCircle, Sun, Moon } from 'lucide-react'; // 🎯 Tambah Sun & Moon
+import { Menu, Search, Bell, UserCircle, Sun, Moon } from 'lucide-react';
 import Sidebar from '@/components/dashboard/Sidebar';
 
 export default function DashboardLayout({
@@ -9,14 +9,15 @@ export default function DashboardLayout({
 }: {
     children: React.ReactNode;
 }) {
-    // State untuk kontrol Sidebar di Mobile
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-
-    // 🎯 State untuk Dark Mode
     const [isDarkMode, setIsDarkMode] = useState(false);
 
-    // 🎯 Cek tema di LocalStorage atau bawaan sistem pas pertama kali load
+    // 🔥 STATE BARU UNTUK DATA USER DI NAVBAR
+    const [userData, setUserData] = useState<any>(null);
+
+    // Cek tema & Ambil Data Profil pas pertama kali load
     useEffect(() => {
+        // --- 1. LOGIKA TEMA DARK/LIGHT ---
         const savedTheme = localStorage.getItem('theme');
         const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
 
@@ -27,9 +28,28 @@ export default function DashboardLayout({
             setIsDarkMode(false);
             document.documentElement.classList.remove('dark');
         }
+
+        // --- 2. AMBIL DATA USER UNTUK PROFIL NAVBAR ---
+        const fetchProfile = async () => {
+            const savedKey = localStorage.getItem('indocast_api_key');
+            if (savedKey) {
+                try {
+                    const res = await fetch('/api/user/me', {
+                        headers: { 'x-api-key': savedKey }
+                    });
+                    if (res.ok) {
+                        const json = await res.json();
+                        setUserData(json.data);
+                    }
+                } catch (error) {
+                    console.error("Gagal load data profil:", error);
+                }
+            }
+        };
+        fetchProfile();
     }, []);
 
-    // 🎯 Fungsi Toggle Tema
+    // Fungsi Toggle Tema
     const toggleTheme = () => {
         if (isDarkMode) {
             document.documentElement.classList.remove('dark');
@@ -85,7 +105,6 @@ export default function DashboardLayout({
                     {/* Kanan: Theme Toggle, Notifikasi & Profil */}
                     <div className="flex items-center gap-2 sm:gap-4">
 
-                        {/* 🎯 TOMBOL TOGGLE DARK MODE 🎯 */}
                         <button
                             onClick={toggleTheme}
                             className="p-2 text-slate-400 hover:text-[var(--primary)] hover:bg-[var(--primary)]/10 rounded-xl transition-all"
@@ -102,10 +121,16 @@ export default function DashboardLayout({
                         <div className="w-px h-6 bg-slate-200 dark:bg-white/10 hidden sm:block mx-1"></div>
 
                         <button className="flex items-center gap-3 hover:opacity-80 transition-opacity ml-1">
+                            {/* 🔥 PROFIL DINAMIS 🔥 */}
                             <div className="hidden sm:block text-right">
-                                <div className="text-xs font-bold text-slate-900 dark:text-white">Faisol</div>
-                                <div className="text-[10px] font-medium text-slate-500">VIP Member</div>
+                                <div className="text-xs font-bold text-slate-900 dark:text-white">
+                                    {userData ? userData.firstName : 'Memuat...'}
+                                </div>
+                                <div className="text-[10px] font-medium text-[var(--primary)]">
+                                    {userData ? `${userData.role} Member` : ''}
+                                </div>
                             </div>
+
                             <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-[var(--primary)] to-purple-500 p-[2px]">
                                 <div className="w-full h-full bg-white dark:bg-[#151822] rounded-full flex items-center justify-center overflow-hidden">
                                     <UserCircle size={24} className="text-slate-400" />
