@@ -110,7 +110,7 @@ model Transaction {
   // Relasi ke Plan yang dibeli
   planId        String
   plan          Plan      @relation(fields: [planId], references: [id])
-  
+  telegramMsgId Int?      // 🔥 TAMBAHIN BARIS INI BRE
   amount        Int       
   status        String    @default("PENDING") 
   paymentMethod String    @default("QRIS")

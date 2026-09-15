@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "next build && TARGET=$(dirname $(find .next/standalone -name server.js | head -n 1)) && cp .env $TARGET/ && cp -r public $TARGET/ && mkdir -p $TARGET/.next && cp -r .next/static $TARGET/.next/",
     "start": "next start",
     "lint": "eslint .",
     "clean": "rm -rf .next"
