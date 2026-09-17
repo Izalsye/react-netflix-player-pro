@@ -8,6 +8,8 @@ const nextConfig: NextConfig = {
   typescript: {
     ignoreBuildErrors: false,
   },
+  // 👇 INI TAMBAHANNYA BRE: Biar cycletls gak dibundle dan .exe nya gak ilang
+  serverExternalPackages: ['cycletls'],
   // Allow access to remote image placeholder.
   images: {
     remotePatterns: [

@@ -2258,7 +2258,7 @@ export const providers: Record<string, ProviderConfig> = {
                 name: "defn",
                 type: "string",
                 required: false,
-                default: "fhd",
+                default: "shd",
                 in: "query",
                 description: "Permintaan kualitas resolusi streaming (SD hingga Full HD)",
                 options: ["fhd", "shd", "hd", "sd"]
