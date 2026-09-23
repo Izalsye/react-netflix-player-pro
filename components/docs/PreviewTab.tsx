@@ -198,16 +198,58 @@ export default function PreviewTab({ providerId, apiKey, isStandalone = false }:
 
     const handlePlayVideo = async (epNum: number, seasonNum: number, vid?: string) => {
         if (!detailData || !adapter) return;
-        setIsPlayLoading(true); setPlayResult(null);
+        setIsPlayLoading(true);
+        setPlayResult(null);
+
         try {
             const reqConfig = adapter.getPlayRequest(detailData, epNum, seasonNum, lang, vid);
             const playEndpoint = allEndpoints.find(e => e.id === reqConfig.endpointId || (e.id.includes('play') && !e.id.includes('info')));
+
             if (!playEndpoint) throw new Error("Endpoint play tidak ditemukan.");
             setPlayEndpointId(playEndpoint.id);
-            const url = buildUrl(playEndpoint, reqConfig.params, lang, 1);
-            const res = await fetch(url, { headers: { 'x-api-key': apiKey } });
+
+            // Tentukan method dari adapter, default ke GET
+            const method = reqConfig.method || 'GET';
+            let fetchUrl = playEndpoint.path;
+
+            const fetchOptions: RequestInit = {
+                method: method,
+                headers: {
+                    'x-api-key': apiKey,
+                    // 🔥 PASTIIN Dapet Fresh DRM (Bust Cache)
+                    'Cache-Control': 'no-cache',
+                    'Pragma': 'no-cache'
+                },
+                cache: 'no-store'
+            };
+
+            // 1. JIKA METHOD POST: Masukkan parameter ke dalam body JSON
+            if (method === 'POST') {
+                fetchOptions.headers = {
+                    ...fetchOptions.headers,
+                    'Content-Type': 'application/json'
+                };
+                fetchOptions.body = JSON.stringify(reqConfig.params);
+            }
+            // 2. JIKA METHOD GET: Pakai buildUrl lu untuk gabungin parameter ke URL
+            else {
+                fetchUrl = buildUrl(playEndpoint, reqConfig.params, lang, 1);
+            }
+
+            const res = await fetch(fetchUrl, fetchOptions);
+
+            if (!res.ok) {
+                const errorText = await res.text();
+                throw new Error(`Error ${res.status}: ${errorText}`);
+            }
+
             setPlayResult(await res.json());
-        } catch (error) { console.error("Gagal load video:", error); } finally { setIsPlayLoading(false); }
+        } catch (error) {
+            console.error("Gagal load video:", error);
+            // Opsional: set state error di sini buat dimunculin ke UI
+        } finally {
+            setIsPlayLoading(false);
+        }
     };
 
     useEffect(() => {

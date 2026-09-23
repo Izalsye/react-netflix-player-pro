@@ -18,6 +18,8 @@ export function useMediaParser(testResult: any, endpointId: string): ParsedMedia
         const isFilmboxOrDramovnime = endpointId.includes('filmbox') || endpointId.includes('dramovnime');
         const isAnimekompi = endpointId.includes('animekompi');
         const isHbo = endpointId.includes('hbo');
+        // 🔥 Tambahin flag buat Anichin
+        const isAnichin = endpointId.includes('anichin');
 
         if (isKomik || endpointId.includes('view')) {
             const rawImages = response?.images || response?.data?.images || response?.data?.pages || response?.pages || response?.data?.halamankomik || [];
@@ -54,7 +56,47 @@ export function useMediaParser(testResult: any, endpointId: string): ParsedMedia
             if (validServer) playableUrl = validServer.url;
         } else if (isHbo) {
             playableUrl = response?.data?.streamUrl || '';
+        } else if (isAnichin) {
+            // 🔥 LOGIC KHUSUS ANICHIN
+            const anichinData = response?.data;
+            if (anichinData) {
+                let rawStreamUrl = anichinData.stream_url || '';
+
+                // Coba cari mirror yang menyediakan array resolusi MP4
+                const mirrorWithRes = anichinData.mirrors?.find((m: any) => m.resolutions && m.resolutions.length > 0);
+                if (mirrorWithRes) {
+                    extractedQualities = mirrorWithRes.resolutions.map((res: any, index: number) => {
+                        const qName = res.quality.toLowerCase();
+                        return {
+                            html: res.quality.toUpperCase(),
+                            url: res.url,
+                            default: qName === 'hd' || qName === 'full' || qName === '1080p' || qName === '720p'
+                        };
+                    });
+
+                    let hasDefault = false;
+                    extractedQualities = extractedQualities.reverse().map(q => {
+                        if (q.default && !hasDefault) { hasDefault = true; return q; }
+                        return { ...q, default: false };
+                    }).reverse();
+                    if (!hasDefault && extractedQualities.length > 0) extractedQualities[0].default = true;
+
+                    // Fallback kalau stream_url utama kosong
+                    if (!rawStreamUrl && extractedQualities.length > 0) {
+                        rawStreamUrl = extractedQualities.find(q => q.default)?.url || extractedQualities[0].url;
+                    }
+                }
+
+                // 🔥 BUNGKUS DENGAN STREAM PROXY 🔥
+                if (rawStreamUrl && rawStreamUrl.includes('.m3u8')) {
+                    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || '';
+                    playableUrl = `${baseUrl}/api/anichin/stream-proxy?url=${encodeURIComponent(rawStreamUrl)}`;
+                } else {
+                    playableUrl = rawStreamUrl;
+                }
+            }
         } else {
+            // Fallback untuk provider umum lainnya
             const streamType = response?.data?.streamType;
             const format = response?.data?.format;
             const m3u8Data = response?.data?.m3u8;
@@ -69,7 +111,6 @@ export function useMediaParser(testResult: any, endpointId: string): ParsedMedia
             } else if (streamType === 'hls_url' && m3u8Data) {
                 playableUrl = m3u8Data;
             } else if (hlsArray.length > 0 && (hlsArray[0].url_proxy || hlsArray[0].url)) {
-                // Ekstrak resolusi Filmbox & Hakuna Matata
                 extractedQualities = hlsArray.map((item: any, index: number) => ({
                     html: item.resolutions ? `${item.resolutions}p` : `Res ${index + 1}`,
                     url: item.url_proxy || item.url,
@@ -77,13 +118,11 @@ export function useMediaParser(testResult: any, endpointId: string): ParsedMedia
                 }));
                 playableUrl = extractedQualities[0].url;
             } else if (wetvResolutions && wetvResolutions.length > 0) {
-                // Ekstrak resolusi WeTV
                 extractedQualities = wetvResolutions.map((item: any, index: number) => ({
                     html: item.resolution ? item.resolution.toUpperCase() : item.name ? item.name.toUpperCase() : `Res ${index + 1}`,
                     url: item.url_proxy || item.url,
                     default: item.name === 'fhd' || item.name === 'shd'
                 }));
-                // Pastikan cuma 1 default terpilih (Prioritas FHD)
                 let hasDefault = false;
                 extractedQualities = extractedQualities.reverse().map(q => {
                     if (q.default && !hasDefault) { hasDefault = true; return q; }

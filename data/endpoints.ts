@@ -385,6 +385,141 @@ export const providers: Record<string, ProviderConfig> = {
     ]
   },
 
+  anichin: {
+    id: 'anichin',
+    name: 'Anichin',
+    logo: 'https://anichin.care/favicon-anichin.webp',
+    description: 'Donghua Streaming and Information Provider.',
+    color: 'from-red-500/20 to-orange-500/20',
+    groups: [
+      {
+        name: "Anichin Core API",
+        tag: "DONGHUA",
+        tagColor: "bg-red-500/20 text-red-400",
+        endpoints: [
+          {
+            id: "home",
+            name: "Home",
+            method: "GET",
+            path: "/api/anichin/home",
+            description: "Get home page data for Anichin (Sliders, Trending, Latest)",
+            params: [
+            ]
+          },
+          {
+            id: "update",
+            name: "All Update",
+            method: "GET",
+            path: "/api/anichin/update",
+            description: "Get the all update donghua",
+            params: [
+              { name: "page", type: "string", required: false, default: "1", in: "query" }
+            ]
+          },
+          {
+            id: "drop",
+            name: "Drop All",
+            method: "GET",
+            path: "/api/anichin/drop",
+            description: "Get drop all from Anichin",
+            params: []
+          },
+          {
+            id: "filter",
+            name: "Filter List",
+            method: "GET",
+            path: "/api/anichin/filters",
+            description: "Get filter list",
+            params: [
+
+            ]
+          },
+          {
+            id: "list",
+            name: "Donghua List & Advanced Filter",
+            method: "GET",
+            path: "/api/anichin/update",
+            description: "Get donghua list with advanced filtering options (Pagination, Genre, Season, Studio, Status, Type, Order)",
+            params: [
+              { name: "page", type: "string", required: false, default: "1", in: "query" },
+              { name: "type", type: "string", required: false, default: "", in: "query" },
+              { name: "status", type: "string", required: false, default: "", in: "query" },
+              { name: "sub", type: "string", required: false, default: "", in: "query" },
+              { name: "order", type: "string", required: false, default: "update", in: "query" },
+              { name: "genre", type: "string", required: false, default: "action,adventure", description: "Comma separated values or multiple query params", in: "query" },
+              { name: "season", type: "string", required: false, default: "", in: "query" },
+              { name: "studio", type: "string", required: false, default: "", in: "query" }
+            ]
+          },
+          {
+            id: "az-options",
+            name: "A-Z Parameters",
+            method: "GET",
+            path: "/api/anichin/az-options",
+            description: "Get available alphabet parameters to be used in A-Z List endpoint",
+            params: []
+          },
+          {
+            id: "list",
+            name: "Donghua List A-Z",
+            method: "GET",
+            path: "/api/anichin/list",
+            description: "Get full A-Z donghua list from Anichin (Supports Pagination)",
+            params: [
+              { name: "show", type: "string", required: false, default: "A", description: "Filter by starting letter (A-Z or . for numbers)", in: "query" },
+              { name: "page", type: "string", required: false, default: "1", description: "Page number for pagination", in: "query" }
+            ]
+          },
+          {
+            id: "search",
+            name: "Search",
+            method: "GET",
+            path: "/api/anichin/search",
+            description: "Search donghua by keyword with pagination support",
+            params: [
+              { name: "q", type: "string", required: true, default: "wor", description: "Search keyword", in: "query" },
+              { name: "page", type: "string", required: false, default: "1", description: "Page number for pagination", in: "query" }
+            ]
+          },
+          {
+            id: "detail",
+            name: "Donghua Detail",
+            method: "GET",
+            path: "/api/anichin/detail",
+            description: "Get detailed information for a specific donghua including synopsis, rating, and full episode list",
+            params: [
+              {
+                name: "path",
+                type: "string",
+                required: true,
+                default: "return-of-the-immortal-emperor",
+                description: "Slug or path of the donghua series",
+                in: "query"
+              }
+            ]
+          },
+          {
+            id: "anichin-play",
+            name: "Get Play / Streaming Info",
+            method: "GET",
+            path: "/api/anichin/play",
+            description: "Get streaming iframe URLs, mirror servers, download links, and navigation for a specific episode",
+            params: [
+              {
+                name: "episode_id",
+                type: "string",
+                required: true,
+                default: "return-of-the-immortal-emperor-episode-01-subtitle-indonesia",
+                description: "Slug of the episode",
+                in: "query"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+
   drakorid: {
     id: 'drakorid',
     name: 'DrakorID',

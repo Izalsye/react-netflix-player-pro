@@ -63,7 +63,8 @@ export function useApiTester(
 
             const options: RequestInit = {
                 method,
-                headers
+                headers,
+                cache: 'no-store'
             };
 
             if ((method === 'POST' || method === 'PUT') && Object.keys(bodyPayload).length > 0) {

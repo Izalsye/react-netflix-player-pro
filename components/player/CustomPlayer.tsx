@@ -345,7 +345,7 @@ export default function CustomPlayer({
             {/* 🔥 LAYER 3: SIDEBAR MENU EPISODES 🔥 */}
             {activeMenu === 'episodes' && (
                 <EpisodeList
-                    episodes={episodes}
+                    episodes={episodes || []} // 🔥 TAMBAHIN || [] DI SINI
                     currentEpisodeIndex={currentEpisodeIndex}
                     onPlayEpisode={onPlayEpisode}
                     setActiveMenu={setActiveMenu}
